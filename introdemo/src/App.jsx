@@ -106,7 +106,7 @@
 // };
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+
 import Note from './components/Note';
 import noteService from './services/notes';
 
@@ -222,6 +222,7 @@ const App = () => {
           show {showAll ? 'important' : 'all'}
         </button>
       </div>
+      {console.log('notesToShow', notesToShow)}
       <ul>
         {notesToShow.map((note) => (
           <Note
