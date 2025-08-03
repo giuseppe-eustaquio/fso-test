@@ -1,6 +1,16 @@
 const notesRouter = require('express').Router();
 const Note = require('../models/note');
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
+
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization');
+
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '');
+  }
+  return null;
+};
 
 notesRouter.get('/', async (request, response) => {
   const notes = await Note.find({}).populate('user', { username: 1, name: 1 });
@@ -18,8 +28,15 @@ notesRouter.get('/:id', async (request, response, next) => {
 
 notesRouter.post('/', async (request, response, next) => {
   const body = request.body;
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
 
-  const user = await User.findById(body.userId);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' });
+  }
+
+  const user = await User.findById(decodedToken.id);
+  console.log('decoded token id is ', decodedToken.userId);
+  console.log('user is', user);
 
   const note = new Note({
     content: body.content,
